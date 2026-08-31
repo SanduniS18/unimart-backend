@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lk.ac.kln.unimart.listing.dto.ListingRequest;
 import lk.ac.kln.unimart.listing.dto.ListingResponse;
 import lk.ac.kln.unimart.listing.service.ListingService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,6 +18,17 @@ public class ListingController {
 
     public ListingController(ListingService service) {
         this.service = service;
+    }
+
+    @GetMapping
+    public Page<ListingResponse> search(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long sellerId,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return service.search(q, sellerId, categoryId, status, page, size);
     }
 
     @GetMapping("/{id}")

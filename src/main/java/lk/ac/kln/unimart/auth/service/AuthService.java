@@ -3,6 +3,7 @@ package lk.ac.kln.unimart.auth.service;
 import lk.ac.kln.unimart.auth.dto.AuthResponse;
 import lk.ac.kln.unimart.auth.dto.LoginRequest;
 import lk.ac.kln.unimart.auth.dto.RegisterRequest;
+import lk.ac.kln.unimart.auth.dto.UserDto;
 import lk.ac.kln.unimart.auth.entity.User;
 import lk.ac.kln.unimart.auth.entity.UserRole;
 import lk.ac.kln.unimart.auth.repository.UserRepository;
@@ -45,7 +46,8 @@ public class AuthService {
         users.save(user);
 
         String token = jwtService.generateAccessToken(user.getUniversityEmail());
-        return new AuthResponse(token, "Bearer", jwtService.getAccessMinutes() * 60);
+        UserDto userDto = new UserDto(user.getId(), user.getUniversityEmail(), user.getFullName(), user.getRole().name());
+        return new AuthResponse(token, "Bearer", jwtService.getAccessMinutes() * 60, userDto);
     }
 
     @Transactional(readOnly = true)
@@ -62,6 +64,7 @@ public class AuthService {
         }
 
         String token = jwtService.generateAccessToken(user.getUniversityEmail());
-        return new AuthResponse(token, "Bearer", jwtService.getAccessMinutes() * 60);
+        UserDto userDto = new UserDto(user.getId(), user.getUniversityEmail(), user.getFullName(), user.getRole().name());
+        return new AuthResponse(token, "Bearer", jwtService.getAccessMinutes() * 60, userDto);
     }
-}
+}

@@ -13,6 +13,10 @@ import lk.ac.kln.unimart.listing.entity.Listing;
 import lk.ac.kln.unimart.listing.entity.ListingStatus;
 import lk.ac.kln.unimart.listing.mapper.ListingMapper;
 import lk.ac.kln.unimart.listing.repository.ListingRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +36,42 @@ public class ListingService {
         this.categories = categories;
         this.users = users;
         this.mapper = mapper;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ListingResponse> search(String q, Long sellerId, Long categoryId,
+                                        String status, int page, int size) {
+        Specification<Listing> spec = Specification.where((Specification<Listing>) null);
+
+        // Exclude ARCHIVED unless explicitly requested
+        if (status != null && !status.isBlank()) {
+            ListingStatus s = ListingStatus.valueOf(status.toUpperCase());
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), s));
+        } else {
+            spec = spec.and((root, query, cb) ->
+                    cb.notEqual(root.get("status"), ListingStatus.ARCHIVED));
+        }
+
+        if (q != null && !q.isBlank()) {
+            String pattern = "%" + q.toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("title")), pattern),
+                    cb.like(cb.lower(root.get("description")), pattern)
+            ));
+        }
+
+        if (sellerId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("seller").get("id"), sellerId));
+        }
+
+        if (categoryId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("category").get("id"), categoryId));
+        }
+
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return listings.findAll(spec, pageable).map(mapper::toResponse);
     }
 
     @Transactional
@@ -93,4 +133,4 @@ public class ListingService {
         }
         return listing;
     }
-}
+}
