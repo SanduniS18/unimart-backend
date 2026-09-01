@@ -78,8 +78,7 @@ public class ListingService {
     public ListingResponse create(ListingRequest request, String email) {
         User seller = users.findByUniversityEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Category category = categories.findByIdAndActiveTrue(request.categoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        Category category = resolveCategory(request.categoryId());
 
         Listing listing = new Listing();
         listing.setSeller(seller);
@@ -104,8 +103,7 @@ public class ListingService {
     @Transactional
     public ListingResponse update(Long id, ListingRequest request, String email) {
         Listing listing = requireOwnedListing(id, email);
-        Category category = categories.findByIdAndActiveTrue(request.categoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+        Category category = resolveCategory(request.categoryId());
 
         listing.setTitle(request.title().trim());
         listing.setDescription(request.description().trim());
@@ -114,6 +112,24 @@ public class ListingService {
         listing.setUpdatedAt(Instant.now());
 
         return mapper.toResponse(listing);
+    }
+
+    private Category resolveCategory(Long categoryId) {
+        if (categoryId != null) {
+            var found = categories.findByIdAndActiveTrue(categoryId);
+            if (found.isPresent()) {
+                return found.get();
+            }
+        }
+        return categories.findAll().stream()
+                .filter(Category::isActive)
+                .findFirst()
+                .orElseGet(() -> {
+                    Category fallback = new Category();
+                    fallback.setName("Other");
+                    fallback.setActive(true);
+                    return categories.save(fallback);
+                });
     }
 
     @Transactional
