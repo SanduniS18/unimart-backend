@@ -40,6 +40,12 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Validation failed", req, fieldErrors);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleGeneral(Exception ex, HttpServletRequest req) {
+        ex.printStackTrace();
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", ex.getMessage(), req, null);
+    }
+
     private ResponseEntity<ApiError> build(HttpStatus status, String code, String message,
                                            HttpServletRequest req, Map<String, String> fieldErrors) {
         ApiError error = new ApiError(code, message, req.getRequestURI(), Instant.now(), fieldErrors);

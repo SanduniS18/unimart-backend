@@ -41,7 +41,7 @@ public class ListingService {
     @Transactional(readOnly = true)
     public Page<ListingResponse> search(String q, Long sellerId, Long categoryId,
                                         String status, int page, int size) {
-        Specification<Listing> spec = Specification.where((Specification<Listing>) null);
+        Specification<Listing> spec = (root, query, cb) -> cb.conjunction();
 
         // Exclude ARCHIVED unless explicitly requested
         if (status != null && !status.isBlank()) {
