@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/unimart_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: unimart_app
+    password: 1833
+
+app:
+  security:
+    jwt-secret: 8f3f9c2b7e1a4d6f0c9b3e7a2d5f8c1b4e7a0d3f6c9b2e5a8d1f4c7b0e3a6d9f

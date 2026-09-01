@@ -13,9 +13,9 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:3000") // update to your frontend origin
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+                registry.addMapping("/**")                          // ← was /api/**
+                        .allowedOrigins("http://localhost:5173")    // ← was localhost:3000
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }
