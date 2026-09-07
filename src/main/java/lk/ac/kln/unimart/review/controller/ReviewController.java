@@ -5,6 +5,7 @@ import lk.ac.kln.unimart.review.dto.ReviewCreateRequest;
 import lk.ac.kln.unimart.review.dto.ReviewResponse;
 import lk.ac.kln.unimart.review.dto.ReviewUpdateRequest;
 import lk.ac.kln.unimart.review.service.ReviewService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,21 @@ public class ReviewController {
 
     public ReviewController(ReviewService service) {
         this.service = service;
+    }
+
+    @GetMapping
+    public Page<ReviewResponse> getReviews(
+            @RequestParam(required = false) Long listingId,
+            @RequestParam(required = false) Long sellerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        if (listingId != null) {
+            return service.getReviewsByListing(listingId, page, size);
+        }
+        if (sellerId != null) {
+            return service.getReviewsBySeller(sellerId, page, size);
+        }
+        return service.getAllReviews(page, size);
     }
 
     @PostMapping

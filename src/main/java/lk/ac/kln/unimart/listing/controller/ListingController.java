@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lk.ac.kln.unimart.listing.dto.ListingRequest;
 import lk.ac.kln.unimart.listing.dto.ListingResponse;
 import lk.ac.kln.unimart.listing.service.ListingService;
+import lk.ac.kln.unimart.review.dto.ReviewResponse;
+import lk.ac.kln.unimart.review.service.ReviewService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +17,11 @@ import org.springframework.web.bind.annotation.*;
 public class ListingController {
 
     private final ListingService service;
+    private final ReviewService reviewService;
 
-    public ListingController(ListingService service) {
+    public ListingController(ListingService service, ReviewService reviewService) {
         this.service = service;
+        this.reviewService = reviewService;
     }
 
     @GetMapping
@@ -34,6 +38,14 @@ public class ListingController {
     @GetMapping("/{id}")
     public ListingResponse get(@PathVariable Long id) {
         return service.get(id);
+    }
+
+    @GetMapping("/{id}/reviews")
+    public Page<ReviewResponse> getReviews(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return reviewService.getReviewsByListing(id, page, size);
     }
 
     @PostMapping
